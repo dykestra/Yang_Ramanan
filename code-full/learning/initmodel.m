@@ -27,7 +27,8 @@ end
 
 % pick dimensions
 if nargin < 3
-  tsize = [floor(nh/model.sbin) floor(nw/model.sbin) nf];
+  %tsize = [floor(nh/model.sbin) floor(nw/model.sbin) nf];
+  tsize = [5 5 nf];
 end
 
 % bias

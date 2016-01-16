@@ -67,8 +67,8 @@ end
 % Read point data from file into 29x2 array
 function [points] = read_points(file)
 
-    N = 29;
-    points = zeros(29,2);
+    N = 3;
+    points = zeros(N,2);
     
     % Open file
     fid = fopen(file, 'rt');
@@ -82,13 +82,29 @@ function [points] = read_points(file)
         c = fscanf(fid, '%c', 1);
     end
     
-    % Read N points
-    nread = 0;
-    while nread < N,
-        [p, dummy] = fscanf(fid, '%f', 2);
-        nread = nread + 1;
-        points(nread,:) = p;
+    % Read point data into array with suitable ordering
+    % tree structure requires (pa(i) < i) for all i
+    % reordering of point data:
+    % [1 16 17 18 19 20 21 22 23 24 2 25 26 27 28 29 15 14 1 12 11 10 19 8
+    % 7 6 5 4 3]
+    points(1,:) = fscanf(fid, '%f', 2);
+    points(11,:) = fscanf(fid, '%f', 2);
+    for i = 29:-1:17
+        points(i,:) = fscanf(fid, '%f', 2);
     end
+    for i = 2:10
+        points(i,:) = fscanf(fid, '%f', 2);
+    end
+    for i = 12:16
+        points(i,:) = fscanf(fid, '%f', 2);
+    end
+    
+    % Cut down version: take every other part
+    points2 = zeros(14,2);
+    for i = 1:14
+        points2(i,:) = points(2*i,:);
+    end
+    points = points2;
 
     % Close file
     fclose(fid);

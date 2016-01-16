@@ -3,14 +3,19 @@ globals;
 name = 'FOREARM';
 % --------------------
 % specify model parameters
-% number of mixtures for 29 parts
-K = [6 6 6 6 6 6 6 6 6 6 6 6 6 6 6 ...
-         6 6 6 6 6 6 6 6 6 6 6 6 6 6]; 
+% specify 1 mixture per part for N parts
+N = 14;
+K = ones(1,N);
+
 % Tree structure for 29 parts: pa(i) is the parent of part i
 % i = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
-pa = [0 1 1 3 4 5 6 7 2 9  10 11 12 13 14 15 2 17 18 19 20 21 22 23 3  25 ...
-      26 27 28 ];
-% i = 27 28 29  
+%pa = [0 1 2 3 4 5 6 7 8 9 10 10 12 13 14 15 1  17 18 19 20 21 22 23 24 25 ...
+%      26 27 28];
+% i =  27 28 29  
+
+% Cut down tree structure with 14 parts:
+%i =  1 2 3 4 5 6 7 8 9 10 11 12 13 14
+pa = [0 1 2 3 4 5 6 7 1 9 10 11 12 13];
 
 % Spatial resolution of HOG cell, interms of pixel width and hieght
 % The FOREARM dataset contains low-res people, so we use low-res parts
@@ -18,7 +23,7 @@ sbin = 4;
 % --------------------
 % Prepare training and testing images and part bounding boxes
 % You will need to write custom *_data() functions for your own dataset
-[pos neg test] = FOREARM_data(name);
+[pos, neg, test] = FOREARM_data(name);
 pos = point2box(pos,pa);
 % --------------------
 % training
@@ -35,8 +40,8 @@ boxes = testmodel(name,model,test,suffix);
 apk = FOREARM_eval_apk(boxes,test);
 meanapk = mean(apk);
 fprintf('mean APK = %.1f\n',meanapk*100);
-fprintf('Keypoints & Head & Shou & Elbo & Wris & Hip\n');
-fprintf('APK       '); fprintf('& %.1f ',apk*100); fprintf('\n');
+fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
+fprintf('APK         '); fprintf('& %.1f ',apk*100); fprintf('\n');
 % --------------------
 % testing phase 2
 % pose estimation given ground truth human box
@@ -48,8 +53,8 @@ boxes_gtbox = testmodel_gtbox(name,model,test,suffix);
 pck = FOREARM_eval_pck(boxes_gtbox,test);
 meanpck = mean(pck);
 fprintf('mean PCK = %.1f\n',meanpck*100); 
-fprintf('Keypoints & Head & Shou & Elbo & Wris & Hip  & Knee & Ankle\n');
-fprintf('PCK       '); fprintf('& %.1f ',pck*100); fprintf('\n');
+fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
+fprintf('PCK         '); fprintf('& %.1f ',pck*100); fprintf('\n');
 % --------------------
 % visualization
 figure(1);
@@ -58,7 +63,8 @@ figure(2);
 visualizeskeleton(model);
 demoimid = 1;
 im = imread(test(demoimid).im);
-colorset = {'g','g','y','r','r','r','r','y','y','y','y','b','b','b','b','y','y','y'};
+
+colorset = {'g','g','y','r','r','y','m','m','y','b','b','y','c','c'};
 box = boxes{demoimid};
 % show all detections
 figure(3);

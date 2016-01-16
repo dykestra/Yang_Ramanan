@@ -40,7 +40,11 @@ for i = 1:size(ovec,2)
     fi = I(k,i);
     
     % paste into root
-    def = model.defs(part.defid(fi));
+    if (size(part.defid) < fi)
+        def = model.defs(part.defid);
+    else 
+        def = model.defs(part.defid(fi));
+    end
     
     x1 = (def.anchor(1)-1)*bs+1 + startpoint(parent,1);
     y1 = (def.anchor(2)-1)*bs+1 + startpoint(parent,2);

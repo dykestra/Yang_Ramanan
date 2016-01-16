@@ -2,11 +2,10 @@ function [apk,prec,rec] = FOREARM_eval_apk(boxes,test)
 
 % -------------------
 % generate candidate keypoint locations
-% Our model produce 29 keypoint locations 
-% Reduce no. keypoints?
-N = 29;
+% Model with N keypoints
+N = floor(size(boxes{1},2)/4);
 I = 1:N;
-A = [1 1 1 1 1  1  1 1  1  1];
+A = ones(1,N);
 Transback = full(sparse(I,I,A,N,N));
 
 % -------------------
@@ -44,7 +43,7 @@ end
 for n = 1:length(test)
   gt(n).numgt = 1;
   gt(n).point = test(n).point;
-  gt(n).scale = norm(gt(n).point(2,:)-gt(n).point(3,:)); % use (hand?) size as the scale
+  gt(n).scale = norm(gt(n).point(1,:)-gt(n).point(3,:)); % use (hand?) size as the scale
   gt(n).det = 0;
 end
 
@@ -60,8 +59,6 @@ for k = 1:numpoint
   end
   [apk(k) prec{k} rec{k}] = eval_apk(ca_p,gt_p);
 end
-
-% average? change the order?
 
 end
 

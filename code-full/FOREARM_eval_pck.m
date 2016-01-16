@@ -1,11 +1,11 @@
 function pck = FOREARM_eval_pck( boxes, test )
+
 % -------------------
 % generate candidate keypoint locations
-% Our model produce 29 keypoint locations
-% Reduce no. keypoints?
-N = 29;
+% model with N keypoints
+N = floor(size(boxes{1},2)/4);
 I = 1:N;
-A = [1 1 1 1 1  1  1 1  1  1];
+A = ones(1,N);
 Transback = full(sparse(I,I,A,N,N));
 
 for n = 1:length(test)
@@ -25,12 +25,10 @@ end
 % generate ground truth keypoint locations
 for n = 1:length(test)
   gt(n).point = test(n).point;
-  gt(n).scale = norm(gt(n).point(2,:)-gt(n).point(3,:)); % use (hand?) size as the scale
+  gt(n).scale = norm(gt(n).point(1,:)-gt(n).point(3,:)); % use (hand?) size as the scale
 end
 
 pck = eval_pck(ca,gt);
-
-% average? change order?
 
 
 end
