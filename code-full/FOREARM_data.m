@@ -3,10 +3,10 @@ function [ pos, neg, test ] = FOREARM_data( name )
 % you want to apply the pose algorithm on some other dataset
 
 % it converts the various data format of different dataset into unique
-% format for pose detection 
+% format for pose detection
 % the unique format for pose detection contains below data structure
 %   pos:
-%     pos(i).im: filename for the image containing i-th human 
+%     pos(i).im: filename for the image containing i-th human
 %     pos(i).point: pose keypoints for the i-th human
 %   neg:
 %     neg(i).im: filename for the image contraining no human
@@ -18,94 +18,187 @@ globals;
 
 cls = [name '_data'];
 try
-	load([cachedir cls]);
+    load([cachedir cls]);
 catch
-   
-    test_range = 0:86;
-    pos_range = 0:891;
-    trainfrs_neg = 615:1832;  % training frames for negative
+      
+    %[pos, test] = load_original();
+    [pos, test] = load_1_mix();
+    %[pos, test] = load_12_mix();
     
-  % -------------------
-  % grab positive annotation and image information
+    % -------------------
+    % grab neagtive image information
+    trainfrs_neg = 615:1832;  % training frames for negative
+    negims = 'INRIA/%.5d.jpg';
+    neg = [];
+    numneg = 0;
+    for fr = trainfrs_neg
+        numneg = numneg + 1;
+        neg(numneg).im = sprintf(negims,fr);
+    end
+    
+    save([cachedir cls],'pos','neg','test')
+end
+
+end
+
+% ORIGINAL FOREARM SET
+function [pos, test] = load_original()
+    grab positive annotation and image information
     posims = 'FOREARM/training_cropped/%.4d.png';
     pospoints = 'FOREARM/training_cropped/%.4d.pts';
-    pos = [];
     numpos = 0;
-    for fr = pos_range
+    for fr = 1:size(posims)
         numpos = numpos + 1;
         pos(numpos).im = sprintf(posims,fr);
         pos(numpos).point = read_points(sprintf(pospoints,fr));
     end
-  
-  % -------------------
-  % grab neagtive image information
-	negims = 'INRIA/%.5d.jpg';
-	neg = [];
-	numneg = 0;
-    for fr = trainfrs_neg
-      numneg = numneg + 1;
-      neg(numneg).im = sprintf(negims,fr);
-    end
-    
-  % -------------------
-  % grab testing image information
+
     testims = 'FOREARM/testing_rotated/%.4d.png';
     testpoints = 'FOREARM/testing_rotated/%.4d.pts';
     test = [];
     numtest = 0;
-    for fr = test_range
-        numtest = numtest + 1;
-        test(numtest).im = sprintf(testims,fr);
-        test(numtest).point = read_points(sprintf(testpoints,fr));
+     for fr = 1:size(testims)
+         numtest = numtest + 1;
+         test(numtest).im = sprintf(testims,fr);
+         test(numtest).point = read_points(sprintf(testpoints,fr));
+     end
+     test = pos(1:500);
+end
+
+% ROTATED TO SAME ORIENTATION
+function [pos, test] = load_1_mix()
+    npos = 600;
+    fid = fopen('FOREARM/Rotated/goodfit.txt');
+    Files = {};
+    line = fgetl(fid);
+    while ischar(line)
+        Files{end+1,1} = line;
+        line = fgetl(fid);
+    end
+    fclose(fid);
+
+    pos = [];
+    for fr = 1:npos
+        pos(fr).im = strcat('FOREARM/Rotated/training/', Files{fr}, '.png');
+        pos(fr).point = read_points(strcat('FOREARM/Rotated/training/', Files{fr}, '.pts'));
     end
     
-  save([cachedir cls],'pos','neg','test')
+    test = [];
+    for fr = (npos+1):size(Files)
+        test(fr-npos).im = strcat('FOREARM/Rotated/testing/', Files{fr}, '.png');
+        test(fr-npos).point = read_points(strcat('FOREARM/Rotated/testing/', Files{fr}, '.pts'));
+    end
 end
 
+% CLUSTERS OF ORIENTATIONS
+function [pos, test] = load_12_mix()
+
+    train_dir = 'FOREARM/Rotated/training/';
+    pos = [];
+    fr = 1;
+    cluster = 1;
+    for theta = 0:30:330
+        angle_dir = [train_dir num2str(theta) '/'];
+        d = dir(angle_dir);
+        for i = 3:2:length(d)
+           pos(fr).im = strcat(angle_dir, d(i).name);
+           pos(fr).point = read_points(strcat(angle_dir, d(i+1).name));
+           pos(fr).mix = cluster;
+           fr = fr + 1;
+        end
+        cluster = cluster + 1;
+    end
+    
+    test_dir = 'FOREARM/Rotated/testing/';
+    test = [];
+    fr = 1;
+    for theta = 0:30:330
+        angle_dir = [test_dir num2str(theta) '/'];
+        d = dir(angle_dir);
+        for i = 3:2:length(d)
+            test(fr).im = strcat(angle_dir, d(i).name);
+            test(fr).points = read_points(strcat(angle_dir, d(i+1).name));
+            fr = fr + 1;
+        end
+    end
 end
 
-% Read point data from file into 29x2 array
+% Read point data from file into Nx2 array
 function [points] = read_points(file)
 
-    N = 3;
-    points = zeros(N,2);
-    
-    % Open file
-    fid = fopen(file, 'rt');
-    if fid < 1,
-       error([' Can not open file ', file]);   
-    end
+N = 37;
 
-    % Skip preamble
-    c = '';
-    while ~strcmp(c,'{'),
-        c = fscanf(fid, '%c', 1);
-    end
-    
-    % Read point data into array with suitable ordering
-    % tree structure requires (pa(i) < i) for all i
-    % reordering of point data:
-    % [1 16 17 18 19 20 21 22 23 24 2 25 26 27 28 29 15 14 1 12 11 10 19 8
-    % 7 6 5 4 3]
-    points(1,:) = fscanf(fid, '%f', 2);
-    points(11,:) = fscanf(fid, '%f', 2);
-    for i = 29:-1:17
-        points(i,:) = fscanf(fid, '%f', 2);
-    end
-    for i = 2:10
-        points(i,:) = fscanf(fid, '%f', 2);
-    end
-    for i = 12:16
-        points(i,:) = fscanf(fid, '%f', 2);
-    end
-    
-    % Cut down version: take every other part
-    points2 = zeros(14,2);
-    for i = 1:14
-        points2(i,:) = points(2*i,:);
-    end
-    points = points2;
-
-    % Close file
-    fclose(fid);
+% Open file
+fid = fopen(file, 'rt');
+if fid < 1,
+    error([' Can not open file ', file]);
 end
+
+% Skip preamble
+c = '';
+while ~strcmp(c,'{'),
+    c = fscanf(fid, '%c', 1);
+end
+
+% Read point data into array with suitable ordering
+% tree structure requires (pa(i) < i) for all i
+points = read_with_reordering(fid, N, 1);
+
+% Close file
+fclose(fid);
+end
+
+% read points in custom order
+% halve=1 if every other point should be taken
+function points = read_with_reordering(fid, N, halve)
+
+    % 29 PART MODEL
+    if (N == 29)
+        % FULL MODEL, reordering of point data:
+        % [1 16 17 18 19 20 21 22 23 24 2 25 26 27 28 29 15 14 1 12 11 10 19 8
+        % 7 6 5 4 3]
+        points(1,:) = fscanf(fid, '%f', 2);
+        points(11,:) = fscanf(fid, '%f', 2);
+        for i = 29:-1:17
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+        for i = 2:10
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+        for i = 12:16
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+    % 37 PART MODEL    
+    elseif (N == 37)
+        % FULL MODEL, reordering of data:
+        % [1 2 3 4 5 6 7 8 9 10 11 23 22 21 20 19 18 17 16 15 14 13 12 24 25 26
+        %  27 28 29 30 31 32 33 34 35 36 37]
+        for i = 1:11
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+        for i = 23:-1:12
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+        for i = 24:37
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+    % 37 PART MODEL
+    elseif (N == 11)
+        % 11 PARTS (skeletal), ordering:
+        % [1 2 3 4 5 6 7 8 9 10 11]
+        for i = 1:11
+            points(i,:) = fscanf(fid, '%f', 2);
+        end
+    end
+
+    % Cut down version: take every other part
+    if halve
+        N = floor(N/2);
+        points2 = zeros(N,2);
+        for i = 1:N
+            points2(i,:) = points(2*i,:);
+        end
+        points = points2;
+    end
+end
+

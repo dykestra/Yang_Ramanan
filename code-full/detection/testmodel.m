@@ -12,7 +12,7 @@ catch
     fprintf([name ': testing: %d/%d\n'],i,length(test));
     im = imread(test(i).im);
     box = detect_fast(im,model,model.thresh);
-    boxes{i} = nms(box,0.3);
+    boxes{i} = nms(box,0.7);
   end
 
   if nargin < 4

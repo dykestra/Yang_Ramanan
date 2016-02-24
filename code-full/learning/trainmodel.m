@@ -6,13 +6,15 @@ file = [cachedir name '.log'];
 delete(file);
 diary(file);
 
-cls = [name '_cluster_' num2str(K')'];
+%cls = [name '_cluster_' num2str(K')'];
+cls = [name '_cluster_' num2str(K(1)) '_' num2str(length(K))];
 try
   load([cachedir cls]);
 catch
   model = initmodel(pos,sbin);
   def = data_def(pos,model);
-  idx = clusterparts(def,K,pa);
+  idx = clusterExamples(pos,K);
+  %idx = clusterparts(def,K,pa);
   save([cachedir cls],'def','idx');
 end
 
@@ -40,6 +42,7 @@ for p = 1:length(pa)
 end
 
 cls = [name '_final1_' num2str(K')'];
+%cls = [name '_final1_' num2str(K(1)) '_' num2str(length(K))];
 try
   load([cachedir cls]);
 catch
@@ -54,6 +57,8 @@ catch
 end
 
 cls = [name '_final_' num2str(K')'];
+
+%cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
 try
   load([cachedir cls]);
 catch

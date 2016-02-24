@@ -7,6 +7,9 @@ end
 assert(numel(ca) == numel(gt));
 
 for n = 1:length(gt)
+  if isempty(ca(n).point)
+    continue;
+  end
   dist(:,n) = sqrt(sum((ca(n).point-gt(n).point).^2,2));
 end
 

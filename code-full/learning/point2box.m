@@ -20,6 +20,8 @@ for n = 1:length(pos)
   boxsize(n) = quantile(ratio,0.75);
 end
 
+%boxsize = repmat(4,1,length(pos));
+
 for n = 1:length(pos)
   pos(n).x1 = pos(n).point(:,1) - boxsize(n)/2;
   pos(n).y1 = pos(n).point(:,2) - boxsize(n)/2;

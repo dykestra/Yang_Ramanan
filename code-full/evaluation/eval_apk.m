@@ -1,4 +1,4 @@
-function [apk prec rec] = eval_apk(ca,gt,thresh)
+function [apk prec rec fp] = eval_apk(ca,gt,thresh)
 
 if nargin < 4
   thresh  = 0.5;
@@ -40,4 +40,7 @@ tp = cumsum(tp);
 rec = tp/sum(cat(1,gt.numgt));
 prec = tp./(fp+tp);
 
-apk = VOCap(rec,prec);
+apk = VOCap(rec,prec)
+tp = tp(end)
+fp = fp(end)
+
