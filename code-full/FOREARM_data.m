@@ -1,4 +1,4 @@
-function [ pos, neg, test ] = FOREARM_data( name )
+function [ pos, neg, test ] = FOREARM_data( name, mix )
 % this function is very dataset specific, you need to modify the code if
 % you want to apply the pose algorithm on some other dataset
 
@@ -16,14 +16,18 @@ function [ pos, neg, test ] = FOREARM_data( name )
 
 globals;
 
-cls = [name '_data'];
+cls = [name '_data_mix_' num2str(mix)];
 try
     load([cachedir cls]);
 catch
       
     %[pos, test] = load_original();
-    [pos, test] = load_1_mix();
-    %[pos, test] = load_12_mix();
+    
+    if (mix == 1)
+        [pos, test] = load_1_mix();
+    else 
+        [pos, test] = load_mult_mix(mix);
+    end
     
     % -------------------
     % grab neagtive image information
@@ -67,37 +71,39 @@ end
 
 % ROTATED TO SAME ORIENTATION
 function [pos, test] = load_1_mix()
-    npos = 600;
-    fid = fopen('FOREARM/Rotated/goodfit.txt');
-    Files = {};
-    line = fgetl(fid);
-    while ischar(line)
-        Files{end+1,1} = line;
-        line = fgetl(fid);
-    end
-    fclose(fid);
-
+    train_dir = 'FOREARM/Rotated/training/';
     pos = [];
-    for fr = 1:npos
-        pos(fr).im = strcat('FOREARM/Rotated/training/', Files{fr}, '.png');
-        pos(fr).point = read_points(strcat('FOREARM/Rotated/training/', Files{fr}, '.pts'));
+    fr = 1;
+    dirData = dir(train_dir);      %# Get the data for the current directory
+    dirIndex = [dirData.isdir];  %# Find the index for directories
+    d = {dirData(~dirIndex).name}';  %'# Get a list of the files
+    for i = 1:2:length(d)
+       pos(fr).im = strcat(train_dir, d{i});
+       pos(fr).point = read_points(strcat(train_dir, d{i+1}));
+       fr = fr + 1;
     end
-    
+
+    test_dir = 'FOREARM/Rotated/testing/';
     test = [];
-    for fr = (npos+1):size(Files)
-        test(fr-npos).im = strcat('FOREARM/Rotated/testing/', Files{fr}, '.png');
-        test(fr-npos).point = read_points(strcat('FOREARM/Rotated/testing/', Files{fr}, '.pts'));
+    fr = 1;
+    dirData = dir(test_dir);      
+    dirIndex = [dirData.isdir];  
+    d = {dirData(~dirIndex).name}'; 
+    for i = 1:2:length(d)
+        test(fr).im = strcat(test_dir, d{i});
+        test(fr).points = read_points(strcat(test_dir, d{i+1}));
+        fr = fr + 1;
     end
 end
 
 % CLUSTERS OF ORIENTATIONS
-function [pos, test] = load_12_mix()
-
+function [pos, test] = load_mult_mix(mix)
+    deg = 360/mix;
     train_dir = 'FOREARM/Rotated/training/';
     pos = [];
     fr = 1;
     cluster = 1;
-    for theta = 0:30:330
+    for theta = 0:deg:330
         angle_dir = [train_dir num2str(theta) '/'];
         d = dir(angle_dir);
         for i = 3:2:length(d)
@@ -112,7 +118,7 @@ function [pos, test] = load_12_mix()
     test_dir = 'FOREARM/Rotated/testing/';
     test = [];
     fr = 1;
-    for theta = 0:30:330
+    for theta = 0:deg:330
         angle_dir = [test_dir num2str(theta) '/'];
         d = dir(angle_dir);
         for i = 3:2:length(d)

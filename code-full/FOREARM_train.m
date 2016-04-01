@@ -14,7 +14,7 @@ sbin = 4
 % --------------------
 % Prepare training and testing images and part bounding boxes
 % You will need to write custom *_data() functions for your own dataset
-[pos, neg, test] = FOREARM_data(name);
+[pos, neg, test] = FOREARM_data(name, mix);
 pos = point2box(pos,pa);
 % --------------------
 % training
