@@ -57,7 +57,7 @@ for k = 1:numpoint
   for n = 1:length(test)
     gt_p(n).point = gt(n).point(k,:);
   end
-  [apk(k) prec{k} rec{k} fp{k}] = eval_apk(ca_p,gt_p);
+  [apk(k) prec{k} rec{k} fp(k)] = eval_apk(ca_p,gt_p);
 end
 
 end

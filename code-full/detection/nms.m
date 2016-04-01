@@ -1,4 +1,4 @@
-function top = nms(boxes,overlap,numpart)
+function top = nms(boxes,overlap,max_ca,numpart)
 % Non-maximum suppression.
 % Greedily select high-scoring detections and skip detections
 % that are significantly covered by a previously selected detection.
@@ -7,6 +7,9 @@ if nargin < 2
   overlap = 0.5;
 end
 if nargin < 3
+    max_ca = 10;
+end
+if nargin < 4
   numpart = floor(size(boxes,2)/4);
 end
 
@@ -16,9 +19,9 @@ if isempty(boxes)
 end
 
 % throw away boxes if the number of candidates are too many
-if size(boxes,1) > 1000
+if size(boxes,1) > max_ca
   [foo,I] = sort(boxes(:,end),'descend');
-  boxes = boxes(I(1:1000),:);
+  boxes = boxes(I(1:max_ca),:);
 end
 
 % collect bounding boxes and scores  

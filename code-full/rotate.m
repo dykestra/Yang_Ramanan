@@ -1,46 +1,65 @@
 function rotate
-   ntrain = 600;
-   ntest = 151;
+   noldtrain = 600;
+   nnewtrain = 300;
+   noldtest = 151;
+   nnewtest = 220;
    origDir = 'FOREARM/Rotated/testing/';
    
    % load list of image numbers from file
    fid = fopen('FOREARM/Rotated/goodfit.txt');
    Files = {};
    line = fgetl(fid);
-   for i=1:ntrain
+   nskip = noldtrain + nnewtrain + noldtest + 1;
+   for i =1:nskip
        line = fgetl(fid);
    end
-   for i=1:ntest
+   for i=1:nnewtest
        Files{end+1,1} = line;
        line = fgetl(fid);
    end
    fclose(fid);
    
-   nrotated = 0;
+   %rotate_to_same_angle(Files, origDir);
+   rotate_into_clusters(30, Files, origDir);
    
-   % rotate into clusters every cs degrees (cs must be factor of 360)
-   cs = 30;
+end
+
+function rotate_one(n, deg, origDir, rotDir)
+    % retrieve image and landmarks
+    img = imread(strcat(origDir, n, '.png'));
+    points = read_points(strcat(origDir, n, '.pts'));
+
+    % find angle needed to rotate forearm to desired orientation, deg
+    centre = mean(points,1);
+    endpoint = points(1,:);
+    rotAngle = rotationAngle(deg, centre, endpoint);
+    fprintf('Centre: (%.2f, %.2f), Endpoint: (%.2f, %.2f)\n', centre(1), centre(2), endpoint(1), endpoint(2));
+    fprintf('Rotation angle: %.2f\n', rotAngle);
+
+    % rotate image and landmarks and save to files
+    rotImg = rotateToOrientation(img, rotAngle);
+    imwrite(rotImg, strcat(rotDir, n, '.png'));
+    rotPoints = rotatePointsToOrientation(img, points, rotAngle); 
+    writePoints(rotPoints, strcat(rotDir, n, '.pts'));
+end
+
+function rotate_to_same_angle(Files, origDir)
+   rotDir = 'FOREARM/Rotated/testing'; 
+   for i = 1:size(Files,1)
+        n = Files{i};
+        rotate_one(n, 0, origDir, rotDir);
+   end
+end
+
+% rotate into clusters every cs degrees (cs must be factor of 360)
+function rotate_into_clusters(cs, Files, origDir)
+   nrotated = 0;
    for deg = 0:cs:360-cs
        rotDir = sprintf('FOREARM/Rotated/testing/%d/',deg);
-       dirSize = floor(size(Files,1)/(360/cs));
+       dirSize = size(Files,1)/(360/cs);
        for i = (nrotated+1):(nrotated+dirSize)
-           % retrieve image and landmarks
             n = Files{i};
-            img = imread(strcat(origDir, n, '.png'));
-            points = read_points(strcat(origDir, n, '.pts'));
-            
-            % find angle needed to rotate forearm to desired orientation, deg
-            centre = mean(points,1);
-            endpoint = points(1,:);
-            rotAngle = rotationAngle(deg, centre, endpoint);
-            fprintf('Centre: (%.2f, %.2f), Endpoint: (%.2f, %.2f)\n', centre(1), centre(2), endpoint(1), endpoint(2));
-            fprintf('Rotation angle: %.2f\n', rotAngle);
-            
-            % rotate image and landmarks and save to files
-            rotImg = rotateToOrientation(img, rotAngle);
-            imwrite(rotImg, strcat(rotDir, n, '.png'));
-            rotPoints = rotatePointsToOrientation(img, points, rotAngle); 
-            writePoints(rotPoints, strcat(rotDir, n, '.pts'));
+            rotate_one(n, deg, origDir, rotDir);
             nrotated = nrotated + 1;
        end
    end
