@@ -1,3 +1,9 @@
+# image data not in relevant sets (FOREARM/Rotated/ and INRIA/)
+*/BUFFY/*
+*/PARSE/*
+*/FOREARM/testing_*
+*/FOREARM/training_*
+
 #cache
 */cache/*
 
