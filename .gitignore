@@ -5,7 +5,7 @@
 */FOREARM/training_*
 
 #cache
-*/cache/*
+*/cache/FOREARM_ROT/*
 
 #mex
 *.mexw64
