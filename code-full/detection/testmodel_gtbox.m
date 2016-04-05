@@ -12,13 +12,7 @@ try
 catch
   boxes = cell(1,length(test));
   for i = 1:length(test)
-    fprintf([name ': testing: %d/%d\n'],i,length(test));
-    im = imread(test(i).im);
-    box = detect_fast(im,model,model.thresh);
-    x = test(i).point(:,1);
-    y = test(i).point(:,2);
-    gtbox = [min(x) min(y) max(x) max(y)];
-    boxes{i} = bestoverlap(box,gtbox,0.3);
+     boxes{i} = test_one_gtbox(name, model, test(i), i);
   end
 
   if nargin < 4 

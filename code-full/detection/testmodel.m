@@ -9,10 +9,7 @@ try
 catch
   boxes = cell(1,length(test));
   for i = 1:length(test)
-    fprintf([name ': testing: %d/%d\n'],i,length(test));
-    im = imread(test(i).im);
-    box = detect_fast(im,model,model.thresh);
-    boxes{i} = nms(box,0.7);
+     boxes{i} = test_one(name, model,test(i),i);
   end
 
   if nargin < 4

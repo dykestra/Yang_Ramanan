@@ -1,0 +1,7 @@
+function [ box ] = test_one(name, model,test_one,i)
+    fprintf([name ': testing: %d\n'],i);
+    im = imread(test_one.im);
+    box = detect_fast(im,model,model.thresh);
+    box = nms(box,0.7);
+end
+
