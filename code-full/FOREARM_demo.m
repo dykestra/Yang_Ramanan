@@ -7,7 +7,7 @@ name = 'FOREARM_ROT';
 % specify model parameters
 % specify mix mixtures per part, for N parts
 N = 18;
-mix = 1;
+mix = 12;
 [K, pa] = get_K_pa(N,mix);
 
 % Spatial resolution of HOG cell, interms of pixel width and hieght
@@ -24,7 +24,8 @@ model = trainmodel(name,pos,neg,K,pa,sbin);
 % --------------------
 % testing phase 1
 % human detection + pose estimation
-suffix = num2str(K')';
+%suffix = num2str(K')';
+suffix = [num2str(K(1)) '_' num2str(length(K))];
 model.thresh = min(model.thresh,-2);
 boxes = testmodel(name,model,test,suffix);
 % additional nms 
