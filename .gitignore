@@ -5,10 +5,11 @@
 */FOREARM/training_*
 
 #cache
-*/cache/FOREARM_ROT/*
+*/cache/*
 
 #mex
 *.mexw64
+*.mexa64
 
 # Windows image file caches
 Thumbs.db

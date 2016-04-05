@@ -3,14 +3,14 @@ function CLUSTERTEST()
   clc; close all; clear;
   globals;
   
-  cluster = parcluster('local');
+  cluster = parcluster('beehive');
   djob = cluster.createJob(...
       'AdditionalPaths',...
       {'detection'});
   djob.AutoAttachFiles = false;
   
   A = 80;
-  for i = 1:10
+  for i = 1:1
       B = i;
       C = randi(10);
       djob.createTask(@dummy_task, 1, {A, B, C});

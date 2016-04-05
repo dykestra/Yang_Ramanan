@@ -13,8 +13,12 @@ try
 catch
   model = initmodel(pos,sbin);
   def = data_def(pos,model);
-  idx = clusterExamples(pos,K);
-  %idx = clusterparts(def,K,pa);
+  if (K(1) > 1) 
+     % with multiple mixtures, take mix field from pos data
+     idx = clusterExamples(pos,K);
+  else 
+     idx = clusterparts(def,K,pa);
+  end
   save([cachedir cls],'def','idx');
 end
 
@@ -41,8 +45,8 @@ for p = 1:length(pa)
   end
 end
 
-cls = [name '_final1_' num2str(K')'];
-%cls = [name '_final1_' num2str(K(1)) '_' num2str(length(K))];
+%cls = [name '_final1_' num2str(K')'];
+cls = [name '_final1_' num2str(K(1)) '_' num2str(length(K))];
 try
   load([cachedir cls]);
 catch
@@ -56,9 +60,8 @@ catch
   save([cachedir cls],'model');
 end
 
-cls = [name '_final_' num2str(K')'];
-
-%cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
+%cls = [name '_final_' num2str(K')'];
+cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
 try
   load([cachedir cls]);
 catch
