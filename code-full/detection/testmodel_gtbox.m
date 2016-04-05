@@ -1,10 +1,5 @@
 function boxes = testmodel_gtbox(name,model,test,suffix)
-% boxes = testmodel_gtbox(name,model,test,suffix)
 % Returns highest scoring pose that sufficiently overlaps a detection window
-% 1) Construct ground-truth bounding box
-% 2) Compute all candidates that sufficiently overlap it
-% 3) Return highest scoring one  
-
 globals;
 
 try
