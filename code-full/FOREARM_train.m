@@ -1,20 +1,18 @@
 function FOREARM_train(N, mix, sbin)
+% Train a forearm model with N parts and mix mixtures per part
+% sbin = Spatial resolution of HOG cell in terms of pixel width and height
 	globals;
 	name = 'FOREARM_ROT';
-	% --------------------
-	% specify model parameters
-	% specify mix mixtures per part, for N parts
 	N
 	mix
-	[K, pa] = get_K_pa(N,mix);
-
-	% Spatial resolution of HOG cell, interms of pixel width and hieght
-	% The FOREARM dataset contains low-res people, so we use low-res parts
 	sbin
+    [K, pa] = get_K_pa(N,mix);
+
 	% --------------------
 	% Prepare training and testing images and part bounding boxes
 	% You will need to write custom *_data() functions for your own dataset
-	[pos, neg, test] = FOREARM_data(name, mix);
+	suffix = [num2str(mix) '_' num2str(N)];
+    [pos, neg, test] = FOREARM_data(name, suffix, mix);
 	pos = point2box(pos,pa);
 	% --------------------
 	% training

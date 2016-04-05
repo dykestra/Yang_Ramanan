@@ -1,9 +1,18 @@
 function FOREARM_demo
+% Complete demo script for forearm model including:
+% 1. loading data
+% 2. model training
+% 3. testing phase 1 (no ground truth box)
+% 4. APK evaluation
+% 5. testing phase 2 (with grount truth box)
+% 6. PCK evaluation
+% 7. Visualisation of results
 
 clc; close all; clear;
 globals;
 name = 'FOREARM_ROT';
-% --------------------
+
+%% --------------------
 % specify model parameters
 % specify mix mixtures per part, for N parts
 N = 18;
@@ -13,19 +22,21 @@ mix = 12;
 % Spatial resolution of HOG cell, interms of pixel width and hieght
 % The FOREARM dataset contains low-res people, so we use low-res parts
 sbin = 4;
-% --------------------
+
+%% --------------------
 % Prepare training and testing images and part bounding boxes
 % You will need to write custom *_data() functions for your own dataset
-[pos, neg, test] = FOREARM_data(name, mix);
+suffix = [num2str(mix) '_' num2str(N)];
+[pos, neg, test] = FOREARM_data(name, suffix, mix);
 pos = point2box(pos,pa);
-% --------------------
+
+%% --------------------
 % training
 model = trainmodel(name,pos,neg,K,pa,sbin);
-% --------------------
+
+%% --------------------
 % testing phase 1
 % human detection + pose estimation
-%suffix = num2str(K')';
-suffix = [num2str(K(1)) '_' num2str(length(K))];
 model.thresh = min(model.thresh,-2);
 boxes = testmodel(name,model,test,suffix);
 % additional nms 
@@ -33,38 +44,37 @@ for i = 1:length(test)
   boxes{i} = nms(boxes{i},0.3,3);
 end
 
-% --------------------
+%% --------------------
 % evaluation 1: average precision of keypoints
 % You will need to write your own APK evaluation code for your data structure
-[apk,prec,rec,fp] = FOREARM_eval_apk(boxes,test);
+[apk,prec,rec,fp] = FOREARM_eval_apk(name,suffix,boxes,test);
+
+% Plotting FP vs APK
 figure(1);
 scatter(fp,apk,'filled');
 fp_marg = range(fp)*0.1;
 apk_marg = range(apk)*0.1;
 axis([min(fp)-fp_marg, max(fp)+fp_marg, min(apk)-apk_marg, max(apk)+apk_marg])
 xlabel('FP'); ylabel('APK');
-meanapk = mean(apk);
-fprintf('mean APK = %.1f\n',meanapk*100);
+
 fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
 fprintf('APK         '); fprintf('& %.1f ',apk*100); fprintf('\n');
 
 
-
-
-% --------------------
+%% --------------------
 % testing phase 2
 % pose estimation given ground truth human box
 model.thresh = min(model.thresh,-2);
 boxes_gtbox = testmodel_gtbox(name,model,test,suffix);
-% --------------------
+
+%% --------------------
 % evaluation 2: percentage of correct keypoints
 % You will need to write your own PCK evaluation code for your data structure
-pck = FOREARM_eval_pck(boxes_gtbox,test);
-meanpck = mean(pck);
-fprintf('mean PCK = %.1f\n',meanpck*100);
+pck = FOREARM_eval_pck(name,suffix,boxes_gtbox,test);
 fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
 fprintf('PCK         '); fprintf('& %.1f ',pck*100); fprintf('\n');
-% --------------------
+
+%% --------------------
 % visualization
 
 % VISUALISE MODEL

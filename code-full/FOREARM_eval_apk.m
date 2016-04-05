@@ -1,5 +1,19 @@
-function [apk,prec,rec,fp] = FOREARM_eval_apk(boxes,test)
-
+function [apk,prec,rec,fp] = FOREARM_eval_apk(name,suffix,boxes,test)
+globals;
+if nargin < 3
+    try
+        load([cachedir name '_boxes_' suffix]);
+    catch
+        error('Results file not found: could not load "boxes"');
+    end
+end
+if nargin < 4
+    try
+        load([cachedir name '_data_' suffix]);
+    catch
+        error('Data file not found: could not load "test"');
+    end
+end
 % -------------------
 % generate candidate keypoint locations
 % Model with N keypoints
@@ -59,6 +73,9 @@ for k = 1:numpoint
   end
   [apk(k) prec{k} rec{k} fp(k)] = eval_apk(ca_p,gt_p);
 end
+
+meanapk = mean(apk);
+fprintf('mean APK = %.1f\n',meanapk*100);
 
 end
 

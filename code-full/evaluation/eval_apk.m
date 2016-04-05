@@ -40,7 +40,7 @@ tp = cumsum(tp);
 rec = tp/sum(cat(1,gt.numgt));
 prec = tp./(fp+tp);
 
-apk = VOCap(rec,prec)
-tp = tp(end)
-fp = fp(end)
+apk = VOCap(rec,prec);
+tp = tp(end);
+fp = fp(end);
 

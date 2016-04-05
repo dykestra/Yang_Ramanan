@@ -1,4 +1,4 @@
-function [ pos, neg, test ] = FOREARM_data( name, mix )
+function [ pos, neg, test ] = FOREARM_data( name, suffix, mix )
 % this function is very dataset specific, you need to modify the code if
 % you want to apply the pose algorithm on some other dataset
 
@@ -15,8 +15,7 @@ function [ pos, neg, test ] = FOREARM_data( name, mix )
 % This function also prepares flipped images and slightly rotated images for training.
 
 globals;
-
-cls = [name '_data_mix_' num2str(mix)];
+cls = [name '_data_' suffix];
 try
     load([cachedir cls]);
 catch

@@ -1,5 +1,19 @@
-function pck = FOREARM_eval_pck( boxes, test )
-
+function pck = FOREARM_eval_pck(name, suffix, boxes, test )
+globals;
+if nargin < 3
+    try
+        load([cachedir name '_boxes_gtbox_' suffix]);
+    catch
+        error('Results file not found: could not load "boxes"');
+    end
+end
+if nargin < 4
+    try
+        load([cachedir name '_data_' suffix]);
+    catch
+        error('Data file not found: could not load "test"');
+    end
+end
 % -------------------
 % generate candidate keypoint locations
 % model with N keypoints
@@ -29,7 +43,8 @@ for n = 1:length(test)
 end
 
 pck = eval_pck(ca,gt);
-
+meanpck = mean(pck);
+fprintf('mean PCK = %.1f\n',meanpck*100);
 
 end
 
