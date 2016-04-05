@@ -11,6 +11,9 @@
 *.mexw64
 *.mexa64
 
+# Autosave files
+*.asv
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
