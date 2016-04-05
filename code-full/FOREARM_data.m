@@ -91,7 +91,7 @@ function [pos, test] = load_1_mix()
     d = {dirData(~dirIndex).name}'; 
     for i = 1:2:length(d)
         test(fr).im = strcat(test_dir, d{i});
-        test(fr).points = read_points(strcat(test_dir, d{i+1}));
+        test(fr).point = read_points(strcat(test_dir, d{i+1}));
         fr = fr + 1;
     end
 end
@@ -123,7 +123,7 @@ function [pos, test] = load_mult_mix(mix)
         d = dir(angle_dir);
         for i = 3:2:length(d)
             test(fr).im = strcat(angle_dir, d(i).name);
-            test(fr).points = read_points(strcat(angle_dir, d(i+1).name));
+            test(fr).point = read_points(strcat(angle_dir, d(i+1).name));
             fr = fr + 1;
         end
     end

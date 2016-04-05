@@ -20,14 +20,14 @@ pos = point2box(pos,pa);
 
 % --------------------
 % load model from cache
-cls = [name '_final_' num2str(K')'];
-%cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
+%cls = [name '_final_' num2str(K')'];
+cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
 load([cachedir cls]);
 
-% --------------------
+%% --------------------
 % testing phase 1
 % human detection + pose estimation
-suffix = num2str(K')';
+suffix = [num2str(K(1)) '_' num2str(length(K))];
 model.thresh = min(model.thresh,-2);
 boxes = testmodel(name,model,test,suffix);
 % additional nms 
@@ -35,7 +35,7 @@ for i = 1:length(test)
   boxes{i} = nms(boxes{i},0.3,3);
 end
 
-% --------------------
+%% --------------------
 % testing phase 2
 % pose estimation given ground truth human box
 model.thresh = min(model.thresh,-2);
