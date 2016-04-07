@@ -45,6 +45,6 @@ end
 pck = eval_pck(ca,gt);
 meanpck = mean(pck);
 fprintf('mean PCK = %.1f\n',meanpck*100);
-
+save([cachedir name '_pck_' suffix], 'pck');
 end
 

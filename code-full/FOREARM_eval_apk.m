@@ -76,6 +76,7 @@ end
 
 meanapk = mean(apk);
 fprintf('mean APK = %.1f\n',meanapk*100);
+save([cachedir name '_apk_' suffix], 'apk','prec','rec','fp');
 
 end
 
