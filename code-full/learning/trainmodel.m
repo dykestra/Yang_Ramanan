@@ -6,8 +6,8 @@ file = [cachedir name '.log'];
 delete(file);
 diary(file);
 
-%cls = [name '_cluster_' num2str(K')'];
-cls = [name '_cluster_' num2str(K(1)) '_' num2str(length(K))];
+suffix = [num2str(K(1)) '_' num2str(length(K))];
+cls = [name '_cluster_' suffix];
 try
   load([cachedir cls]);
 catch
@@ -45,8 +45,7 @@ for p = 1:length(pa)
   end
 end
 
-%cls = [name '_final1_' num2str(K')'];
-cls = [name '_final1_' num2str(K(1)) '_' num2str(length(K))];
+cls = [name '_final1_' suffix];
 try
   load([cachedir cls]);
 catch
@@ -60,8 +59,7 @@ catch
   save([cachedir cls],'model');
 end
 
-%cls = [name '_final_' num2str(K')'];
-cls = [name '_final_' num2str(K(1)) '_' num2str(length(K))];
+cls = [name '_final_' suffix];
 try
   load([cachedir cls]);
 catch
