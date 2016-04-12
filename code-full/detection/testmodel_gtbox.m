@@ -3,15 +3,16 @@ function boxes = testmodel_gtbox(name,model,test,suffix)
 globals;
 
 try
-  load([cachedir name '_boxes_gtbox_' suffix]);
+    load([cachedir name '_boxes_gtbox_' suffix]);
 catch
-  boxes = cell(1,length(test));
-  for i = 1:length(test)
-     boxes{i} = test_one_gtbox(name, model, test(i), i);
-  end
-
-  if nargin < 4 
-    suffix = [];
-  end
-  save([cachedir name '_boxes_gtbox_' suffix], 'boxes','model');
+    boxes = cell(1,length(test));
+    for i = 1:length(test)
+        fprintf([name ': testing: %d/%d\n'],i,length(test));
+        boxes{i} = test_one_gtbox(name, model, test(i), i);
+    end
+    
+    if nargin < 4
+        suffix = [];
+    end
+    save([cachedir name '_boxes_gtbox_' suffix], 'boxes','model');
 end

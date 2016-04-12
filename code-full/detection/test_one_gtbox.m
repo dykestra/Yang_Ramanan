@@ -3,7 +3,6 @@ function [ box ] = test_one_gtbox(name, model,test_one,i)
 % 2) Compute all candidates that sufficiently overlap it
 % 3) Return highest scoring one  
 
-    fprintf([name ': testing: %d\n'],i);
     im = imread(test_one.im);
     box = detect_fast(im,model,model.thresh);
     x = test_one.point(:,1);
