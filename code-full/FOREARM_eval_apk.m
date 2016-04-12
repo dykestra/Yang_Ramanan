@@ -1,4 +1,4 @@
-function [apk,prec,rec,fp] = FOREARM_eval_apk(name,suffix,boxes,test)
+function [apk,prec,rec] = FOREARM_eval_apk(name,suffix,boxes,test)
 globals;
 if nargin < 3
     try
@@ -71,12 +71,12 @@ for k = 1:numpoint
   for n = 1:length(test)
     gt_p(n).point = gt(n).point(k,:);
   end
-  [apk(k) prec{k} rec{k} fp(k)] = eval_apk(ca_p,gt_p);
+  [apk(k), prec{k}, rec{k}] = eval_apk(ca_p,gt_p);
 end
 
 meanapk = mean(apk);
 fprintf('mean APK = %.1f\n',meanapk*100);
-save([cachedir name '_apk_' suffix], 'apk','prec','rec','fp');
+save([cachedir name '_apk_' suffix], 'apk','prec','rec');
 
 end
 

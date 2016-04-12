@@ -39,25 +39,25 @@ model = trainmodel(name,pos,neg,K,pa,sbin);
 % human detection + pose estimation
 model.thresh = min(model.thresh,-2);
 boxes = testmodel(name,model,test,suffix);
-% additional nms 
+% additional nms
 for i = 1:length(test)
-  boxes{i} = nms(boxes{i},0.3,3);
+    boxes{i} = nms(boxes{i},0.3,3);
 end
 
 %% --------------------
 % evaluation 1: average precision of keypoints
 % You will need to write your own APK evaluation code for your data structure
-[apk,prec,rec,fp] = FOREARM_eval_apk(name,suffix,boxes,test);
+[apk,prec,rec] = FOREARM_eval_apk(name,suffix,boxes,test);
 
-% Plotting FP vs APK
+% Plotting Precision-Recall curves
 figure(1);
-scatter(fp,apk,'filled');
-fp_marg = range(fp)*0.1;
-apk_marg = range(apk)*0.1;
-axis([min(fp)-fp_marg, max(fp)+fp_marg, min(apk)-apk_marg, max(apk)+apk_marg])
-xlabel('FP'); ylabel('APK');
+for i=1:length(prec)
+    plot(rec{1,i},prec{1,i});hold on;
+end
+axis([0,1,0,1]);
+xlabel('Recall'); ylabel('Precision');
 
-fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
+fprintf('Keypoints: '); fprintf(' &  %.2d ',1:N); fprintf('\n');
 fprintf('APK         '); fprintf('& %.1f ',apk*100); fprintf('\n');
 
 
@@ -71,17 +71,17 @@ boxes_gtbox = testmodel_gtbox(name,model,test,suffix);
 % evaluation 2: percentage of correct keypoints
 % You will need to write your own PCK evaluation code for your data structure
 pck = FOREARM_eval_pck(name,suffix,boxes_gtbox,test);
-fprintf('Keypoints: '); fprintf(' &  %.2d ',1:14); fprintf('\n');
+fprintf('Keypoints: '); fprintf(' &  %.2d ',1:N); fprintf('\n');
 fprintf('PCK         '); fprintf('& %.1f ',pck*100); fprintf('\n');
 
 %% --------------------
 % visualization
 
 % VISUALISE MODEL
-%figure(2);
-%visualizemodel(model);
-%figure(3);
-%visualizeskeleton(model);
+figure(2);
+visualizemodel(model);
+figure(3);
+visualizeskeleton(model);
 
 % VISUALISE DETECTIONS
 nVis = 10;
@@ -90,26 +90,37 @@ figno = 4;
 for i = 1:length(demoimids)
     demoimid = demoimids(i);
     im = imread(test(demoimid).im);
-
+    
     colours = ['g','y','r','m','b','c'];
     colorset = cell(1,N);
     for i = 1:N
-       colorset{i} = colours(randi([1,size(colours,2)])); 
+        colorset{i} = colours(randi([1,size(colours,2)]));
     end
     box = boxes{demoimid};
     % show all detections
     figure(figno);
     subplot(1,2,1); showboxes(im,box,colorset);
-    title(demoimid);
+    title('Boxes');
     subplot(1,2,2); showskeletons(im,box,colorset,model.pa);
+    title('Skeleton');
+    make_title(demoimid, 'without GT box');
+    
     % show best detection overlap with ground truth box
     box = boxes_gtbox{demoimid};
     figure(figno+1);
     subplot(1,2,1); showboxes(im,box,colorset);
-    title(demoimid);
+    title('Boxes');
     subplot(1,2,2); showskeletons(im,box,colorset,model.pa);
+    title('Skeleton');
+    make_title(demoimid, 'with GT box');
     figno = figno + 2;
 end
-    
+
 end
 
+function make_title(demoimid, rest)
+    annotation('textbox', [0 0.9 1 0.1], ...
+    'String', [sprintf('Image No: %d, ',demoimid) rest], ...
+    'EdgeColor', 'none', ...
+    'HorizontalAlignment', 'center')
+end
