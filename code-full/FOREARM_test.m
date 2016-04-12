@@ -12,8 +12,7 @@ function FOREARM_test(N, mix, sbin)
     % Prepare training and testing images and part bounding boxes
     % You will need to write custom *_data() functions for your own dataset
     suffix = [num2str(mix) '_' num2str(N)];
-    [pos, neg, test] = FOREARM_data(name, suffix, mix);
-    pos = point2box(pos,pa);
+    [~,~,test] = FOREARM_data(name, suffix, mix);
 
     % --------------------
     % load model from cache
@@ -25,10 +24,6 @@ function FOREARM_test(N, mix, sbin)
     % human detection + pose estimation
     model.thresh = min(model.thresh,-2);
     boxes = testmodel(name,model,test,suffix);
-    % additional nms 
-    for i = 1:length(test)
-      boxes{i} = nms(boxes{i},0.3,3);
-    end
 
     %% --------------------
     % testing phase 2
