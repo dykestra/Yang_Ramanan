@@ -9,6 +9,7 @@ try
 catch
   boxes = cell(1,length(test));
   for i = 1:length(test)
+     fprintf([name ': testing: %d/%d'],i,length(test));
      boxes{i} = test_one(name, model,test(i),i);
   end
 
