@@ -5,14 +5,18 @@ globals;
 try
     load([cachedir name '_boxes_gtbox_' suffix]);
 catch
-    boxes = cell(1,length(test));
+    %boxes = cell(1,length(test));
     for i = 1:length(test)
-        fprintf([name ': testing: %d/%d\n'],i,length(test));
-        boxes{i} = test_one_gtbox(name, model, test(i), i);
+        boxfile = sprintf([cachedir name '_boxes_gtbox_%d_' suffix],i);
+        if ~exist([boxfile '.mat'], 'file')
+            fprintf([name ': testing: %d/%d\n'],i,length(test));
+            box = test_one_gtbox(name, model, test(i), i);
+            save(boxfile, 'box');
+        end
     end
     
     if nargin < 4
         suffix = [];
     end
-    save([cachedir name '_boxes_gtbox_' suffix], 'boxes','model');
+    %save([cachedir name '_boxes_gtbox_' suffix], 'boxes','model');
 end
